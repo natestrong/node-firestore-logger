@@ -1,0 +1,26 @@
+{
+  "name": "node-firestore-logger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/lodash": "^4.14.171",
+    "@types/node": "^16.0.1"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^4.13.1",
+    "express": "^4.17.1",
+    "firebase": "^8.7.0",
+    "firebase-admin": "^9.10.0",
+    "lodash": "^4.17.21",
+    "rxfire": "^4.0.0",
+    "rxjs": "^7.2.0"
+  }
+}
