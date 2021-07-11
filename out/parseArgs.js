@@ -1,8 +1,8 @@
 "use strict";
 exports.__esModule = true;
 exports._convertTokenToCollection = exports.parseCollectionsFromArgs = void 0;
-function parseCollectionsFromArgs(collectionsFromArgs) {
-    var tokens = collectionsFromArgs.split(',');
+function parseCollectionsFromArgs(arg) {
+    var tokens = arg.split(',');
     return tokens.map(this._convertTokenToCollection);
 }
 exports.parseCollectionsFromArgs = parseCollectionsFromArgs;
@@ -12,7 +12,7 @@ exports.parseCollectionsFromArgs = parseCollectionsFromArgs;
 function _convertTokenToCollection(token) {
     return {
         path: token.split('(')[0],
-        queries: token.split('(')[1].padStart(1, '(')
+        queries: token.split('(')[1] ? '(' + token.split('(')[1] : null
     };
 }
 exports._convertTokenToCollection = _convertTokenToCollection;

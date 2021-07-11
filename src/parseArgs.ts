@@ -1,7 +1,7 @@
-import {ICollection, ICollectionGroup} from "./models/path";
+import {ICollection, ICollectionGroup} from "./models/collection";
 
-export function parseCollectionsFromArgs(collectionsFromArgs: string): ICollection[] {
-    const tokens = collectionsFromArgs.split(',');
+export function parseCollectionsFromArgs(arg: string): ICollection[] {
+    const tokens = arg.split(',');
     return tokens.map(this._convertTokenToCollection);
 }
 
@@ -11,7 +11,7 @@ export function parseCollectionsFromArgs(collectionsFromArgs: string): ICollecti
 export function _convertTokenToCollection(token: string): ICollection {
     return {
         path: token.split('(')[0],
-        queries: token.split('(')[1].padStart(1, '(')
+        queries: token.split('(')[1] ? '(' + token.split('(')[1] : null
     };
 }
 

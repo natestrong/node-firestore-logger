@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports._convertTokenToCollection = exports.parseCollectionsFromArgs = void 0;
 function parseCollectionsFromArgs(collectionsFromArgs) {
-    const tokens = collectionsFromArgs.split(',');
+    var tokens = collectionsFromArgs.split(',');
     return tokens.map(this._convertTokenToCollection);
 }
 exports.parseCollectionsFromArgs = parseCollectionsFromArgs;
@@ -12,7 +12,7 @@ exports.parseCollectionsFromArgs = parseCollectionsFromArgs;
 function _convertTokenToCollection(token) {
     return {
         path: token.split('(')[0],
-        queries: token.split('(')[1].padStart(1, '(')
+        queries: token.split('(')[1] ? '(' + token.split('(')[1] : null
     };
 }
 exports._convertTokenToCollection = _convertTokenToCollection;
@@ -22,4 +22,3 @@ exports._convertTokenToCollection = _convertTokenToCollection;
 //     tokens.forEach(this._convertTokenToCollection);
 //     return paths;
 // }
-//# sourceMappingURL=parseArgs.js.map

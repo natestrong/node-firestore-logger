@@ -5,7 +5,7 @@ import yargs from "yargs";
 import {merge} from "rxjs";
 import DocumentChange = firebase.firestore.DocumentChange;
 import {parseCollectionsFromArgs} from "./parseArgs";
-import {ICollection, ICollectionGroup} from "./models/path";
+import {ICollection, ICollectionGroup} from "./models/collection";
 
 
 const {argv} = yargs(process.argv);
