@@ -1,0 +1,1 @@
+{"version":3,"file":"parsePathsFromArgs.js","sourceRoot":"","sources":["../src/parsePathsFromArgs.ts"],"names":[],"mappings":";;;AAEA,SAAgB,kBAAkB,CAAC,aAAqB;IACpD,IAAM,MAAM,GAAG,aAAa,CAAC,KAAK,CAAC,GAAG,CAAC,CAAC;IACxC,IAAM,KAAK,GAAY,EAAE,CAAC;IAC1B,MAAM,CAAC,OAAO,EAAE,CAAC;IACjB,OAAO,KAAK,CAAC;AACjB,CAAC;AALD,gDAKC"}

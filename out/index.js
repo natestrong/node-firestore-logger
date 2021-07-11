@@ -1,12 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const yargs_1 = __importDefault(require("yargs"));
-const parseArgs_1 = require("./parseArgs");
-const { argv } = yargs_1.default(process.argv);
-const collections = parseArgs_1.parseCollectionsFromArgs(argv['collections']);
+exports.__esModule = true;
+var yargs_1 = require("yargs");
+var parseArgs_1 = require("./parseArgs");
+var argv = yargs_1["default"](process.argv).argv;
+var collections = parseArgs_1.parseCollectionsFromArgs(argv['collections']);
 // const collectionPaths: ICollectionGroup[] = parseCollectionGroupsFromArgs(argv['collectionPaths']);
 // const usersCollection = firestore.collection(path);
 //
