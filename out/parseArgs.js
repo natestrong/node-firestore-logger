@@ -8,15 +8,9 @@ function validateCollections(collectionsArg, collectionsGroupsArg) {
     if (!collections.length && !collectionGroups.length) {
         throw new Error('Must supply a collection or collection group to watch. Use --help for more info.');
     }
-    collections.forEach(_logCollectionInit);
-    collectionGroups.forEach(_logCollectionInit);
     return [collections, collectionGroups];
 }
 exports.validateCollections = validateCollections;
-function _logCollectionInit(collection) {
-    console.log("Watching Collection" + (collection.group ? ' Group' : '') + ": " + collection.path + " " + (collection.queries.length ?
-        'with queries: ' + collection.queries : ''));
-}
 /**
  * @param arg - String of comma separated collection queries, such as: '/users,/users("first", "==", "Nathan")'
  * @param groups - Whether or not to treat collection paths as collectionGroup paths, which do not allow '/'s

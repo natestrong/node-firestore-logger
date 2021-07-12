@@ -9,15 +9,7 @@ export function validateCollections(collectionsArg, collectionsGroupsArg): [ICol
         throw new Error('Must supply a collection or collection group to watch. Use --help for more info.');
     }
 
-    collections.forEach(_logCollectionInit);
-    collectionGroups.forEach(_logCollectionInit);
-
     return [collections, collectionGroups];
-}
-
-function _logCollectionInit(collection: ICollection) {
-    console.log(`Watching Collection${collection.group ? ' Group' : ''}: ${collection.path} ${collection.queries.length ?
-        'with queries: ' + collection.queries : ''}`);
 }
 
 /**

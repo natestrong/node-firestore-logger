@@ -1,4 +1,4 @@
-import {parseCollectionsFromArgs, validateCollections} from "./parseArgs";
+import {parseCollectionsFromArgs, validateCollections} from "./parseCollectionArgs";
 
 describe('parseArgs', () => {
     it('should validate that some collections are to be operated on via args', () => {
