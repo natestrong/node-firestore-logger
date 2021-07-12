@@ -1,31 +1,58 @@
-import {parseCollectionGroupsFromArgs, parseCollectionsFromArgs} from "./parseArgs";
+import {parseCollectionsFromArgs, validateCollections} from "./parseArgs";
 
 describe('parseArgs', () => {
-    it('parseCollectionsFromArgs converts given args as strings to an array of ', () => {
-        const arg = '/users,/users("first", "==", "Nathan"),users';
-        const expected = [{collection: '/users', queries: null}, {collection: '/users', queries: '("first", "==", "Nathan")'}];
-        expect(parseCollectionsFromArgs(arg)).toEqual(expected);
+    it('should validate that some collections are to be operated on via args', () => {
+        expect(() => validateCollections('', ''))
+            .toThrowError('Must supply a collection or collection group to watch. Use --help for more info.');
     });
 
-    it('parseCollectionGroupsFromArgs', () => {
-        const arg1 = 'users,twitterFollowers';
-        const expected1 = [
-            {collectionGroup: 'users', queries: null},
-            {collectionGroup: 'twitterFollowers', queries: null}
-        ];
-        expect(parseCollectionGroupsFromArgs(arg1)).toEqual(expected1);
+    it('should return validated collections', () => {
+        expect(validateCollections(
+            '/users("first", "==", "Nathan")("last", "==", "Nathan"),/groups("id", ">", 100)',
+            'twitterFollowers("id", ">", 10000)("name", "==", "Leo Messi")'
+        ))
+            .toEqual([
+                [
+                    {path: '/users', queries: ['("first", "==", "Nathan")', '("last", "==", "Nathan")']},
+                    {path: '/groups', queries: ['("id", ">", 100)']}
+                ],
+                [
+                    {path: 'twitterFollowers', queries: ['("id", ">", 10000)', '("name", "==", "Leo Messi")'], group: true}
+                ]
+            ]);
+    });
 
-        const arg2 = 'twitterFollowers,twitterFollowers("id", "===", "5")';
-        const expected2 = [
-            {collectionGroup: 'twitterFollowers', queries: null},
-            {collectionGroup: 'twitterFollowers', queries: '("id", "===", "5")'}
-        ];
-        expect(parseCollectionGroupsFromArgs(arg2)).toEqual(expected2);
+    it('should convert args to Collection arrays', () => {
+        expect(parseCollectionsFromArgs('/users,/users("first", "==", "Nathan")'))
+            .toEqual([
+                {path: '/users', queries: []},
+                {path: '/users', queries: ['("first", "==", "Nathan")']}
+            ]);
+    });
 
-        const arg3 = '/users';
-        const expected3 = [
-            {collectionGroup: 'users', queries: null},
-        ];
-        expect(() => parseCollectionGroupsFromArgs(arg3)).toThrowError('Collection Group must not contain slashes');
-    })
+    it('should parse empty string or null values as empty arrays', () => {
+        expect(parseCollectionsFromArgs('')).toEqual([]);
+        expect(parseCollectionsFromArgs(null)).toEqual([]);
+    });
+
+    it('should parse collections with multiple queries', () => {
+        expect(parseCollectionsFromArgs('/users("first", "==", "Nathan")("last", "==", "Nathan"),/groups("id", ">", 100)'))
+            .toEqual([
+                {path: '/users', queries: ['("first", "==", "Nathan")', '("last", "==", "Nathan")']},
+                {path: '/groups', queries: ['("id", ">", 100)']},
+            ]);
+    });
+
+    it('should return unique Collections only', () => {
+        expect(parseCollectionsFromArgs('/users("first", "==", "Nathan"),/groups,/users("first", "==", "Nathan")'))
+            .toEqual([
+                {path: '/users', queries: ['("first", "==", "Nathan")']},
+                {path: '/groups', queries: []}
+            ]);
+    });
+
+    it('should validate that group collections do not have "/"', () => {
+        expect(() => parseCollectionsFromArgs('/users,twitterFollowers', true))
+            .toThrowError('collectionGroups can not contain "/"');
+    });
 });

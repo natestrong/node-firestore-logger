@@ -1,41 +1,63 @@
-import {ICollection, ICollectionGroup} from "./models/collection";
+import {ICollection} from "./models/collection";
 import * as _ from 'lodash';
 
+export function validateCollections(collectionsArg, collectionsGroupsArg): [ICollection[], ICollection[]] {
+    let collections = parseCollectionsFromArgs(collectionsArg);
+    let collectionGroups = parseCollectionsFromArgs(collectionsGroupsArg, true);
+
+    if (!collections.length && !collectionGroups.length) {
+        throw new Error('Must supply a collection or collection group to watch. Use --help for more info.');
+    }
+
+    collections.forEach(_logCollectionInit);
+    collectionGroups.forEach(_logCollectionInit);
+
+    return [collections, collectionGroups];
+}
+
+function _logCollectionInit(collection: ICollection) {
+    console.log(`Watching Collection${collection.group ? ' Group' : ''}: ${collection.path} ${collection.queries.length ?
+        'with queries: ' + collection.queries : ''}`);
+}
+
 /**
- *
  * @param arg - String of comma separated collection queries, such as: '/users,/users("first", "==", "Nathan")'
+ * @param groups - Whether or not to treat collection paths as collectionGroup paths, which do not allow '/'s
  */
-export function parseCollectionsFromArgs(arg: string): ICollection[] {
-    const regex = /(?<!["']),/g;
-    const tokens = arg.split(regex);
+export function parseCollectionsFromArgs(arg: string, groups: boolean = false): ICollection[] {
+    if (!arg || !arg.length) {
+        return [];
+    }
+    const tokens = arg.split(/(?<!["']),/g);
     const collections = tokens.map(_convertTokenToCollection);
+
+    if (groups) {
+        collections.forEach(_validateGroupCollectionPaths);
+    }
+
     return _.uniqWith(collections, _.isEqual);
 }
 
 function _convertTokenToCollection(token: string): ICollection {
-    const tokens = token.split('(');
-    const path = tokens[0].startsWith('/') ? tokens[0] : '/' + tokens[0];
+    let path = token.split('(')[0];
     return {
-        collection: path,
-        queries: tokens[1] ? '(' + tokens[1] : null
+        path: path,
+        queries: _getQueriesFromToken(token)
     };
 }
 
-export function parseCollectionGroupsFromArgs(arg: string): ICollectionGroup[] {
-    const regex = /(?<!["']),/g;
-    const tokens = arg.split(regex);
-    const collections = tokens.map(_convertTokenToCollectionGroup);
-    return _.uniqWith(collections, _.isEqual);
-}
-
-function _convertTokenToCollectionGroup(token: string): ICollectionGroup {
-    const tokens = token.split('(');
-    const path = tokens[0]
-    if (path.includes('/')) {
-        throw new Error('Collection Group must not contain slashes');
+function _getQueriesFromToken(token: string): string[] {
+    const match = token.match(/\(.+/);
+    if (!match) {
+        return [];
     }
-    return {
-        collectionGroup: path,
-        queries: tokens[1] ? '(' + tokens[1] : null
-    };
+
+    return match[0].match(/\(.*?\)/g);
+}
+
+function _validateGroupCollectionPaths(collection: ICollection) {
+    if (collection.path.includes('/')) {
+        throw new Error('collectionGroups can not contain "/"');
+    }
+    collection.group = true;
 }

@@ -1,10 +1,12 @@
 "use strict";
+var _a;
 exports.__esModule = true;
 var yargs_1 = require("yargs");
 var parseArgs_1 = require("./parseArgs");
 var argv = yargs_1["default"](process.argv).argv;
-var collections = parseArgs_1.parseCollectionsFromArgs(argv['collections']);
-// const collectionPaths: ICollectionGroup[] = parseCollectionGroupsFromArgs(argv['collectionPaths']);
+var collections;
+var collectionGroups;
+_a = parseArgs_1.validateCollections(argv['collections'], argv['collectionGroups']), collections = _a[0], collectionGroups = _a[1];
 // const usersCollection = firestore.collection(path);
 //
 // let initialEmission = true;

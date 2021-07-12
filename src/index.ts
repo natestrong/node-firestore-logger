@@ -4,15 +4,16 @@ import firebase from "firebase";
 import yargs from "yargs";
 import {merge} from "rxjs";
 import DocumentChange = firebase.firestore.DocumentChange;
-import {parseCollectionsFromArgs} from "./parseArgs";
-import {ICollection, ICollectionGroup} from "./models/collection";
+import {parseCollectionsFromArgs, validateCollections} from "./parseArgs";
+import {ICollection} from "./models/collection";
 
 
 const {argv} = yargs(process.argv);
 
-const collections: ICollection[] = parseCollectionsFromArgs(argv['collections']);
-// const collectionPaths: ICollectionGroup[] = parseCollectionGroupsFromArgs(argv['collectionPaths']);
+let collections: ICollection[];
+let collectionGroups: ICollection[];
 
+[collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
 
 // const usersCollection = firestore.collection(path);
 //
