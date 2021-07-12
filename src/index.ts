@@ -5,7 +5,7 @@ import yargs from "yargs";
 import {first, map, merge, Observable, skip} from "rxjs";
 import {validateCollections} from "./parseCollectionArgs";
 import {ICollection, IMessage} from "./models/collection";
-import logger from "./logger";
+import logger, {Colors} from "./logger";
 import Query = firebase.firestore.Query;
 
 const {argv} = yargs(process.argv);
@@ -41,7 +41,7 @@ for (let collection of [...collections, ...collectionGroups]) {
                 let queriesMessage = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : '';
                 return {
                     collection,
-                    message: `${collection.path}${queriesMessage} has ${docChanges.length} docs\n`
+                    message: `${Colors.BgWhite}${Colors.Underscore}${Colors.FgBlack}        ${collection.path}${queriesMessage} has ${docChanges.length} docs        ${Colors.Reset}`,
                 };
             })
         )
@@ -51,12 +51,22 @@ for (let collection of [...collections, ...collectionGroups]) {
         .pipe(
             skip(1),
             map(docChanges => {
+                let color = Colors.FgGreen;
+                switch (docChanges[0].type) {
+                    case 'modified':
+                        color = Colors.FgBlue;
+                        break;
+                    case 'removed':
+                        color = Colors.FgRed;
+                        break;
+                }
+
                 const message = docChanges
-                    .map(docChange => `Document ${collection.path}/${docChange.doc.id} has been ${docChange.type}`)
+                    .map(docChange => `${color}Document ${collection.path}/${docChange.doc.id} has been ${docChange.type}${Colors.Reset}`)
                     .join('\n');
                 return {
                     collection,
-                    message
+                    message,
                 };
             })
         )
@@ -66,29 +76,3 @@ for (let collection of [...collections, ...collectionGroups]) {
 merge(...collectionObservables).subscribe(iMessage => {
     logger.log(iMessage.message);
 });
-
-// const usersCollection = firestore.collection(path);
-//
-// let initialEmission = true;
-//
-// const obs1 = collectionChanges(usersCollection);``
-//
-// merge(obs1)
-//     .pipe(
-//     )
-//     .subscribe((docChanges: DocumentChange[]) => {
-//         if (initialEmission) {
-//             console.log(`${docChanges.length} docs in collection`);
-//             initialEmission = false;
-//             return;
-//         }
-//
-//         if (docChanges.length > 1) {
-//             console.log(`${docChanges.length} docs have been ${docChanges[0].type}`);
-//             return;
-//         }
-//
-//         docChanges.forEach(docChange => {
-//             console.log(`Document ${docChange.doc.id} has been ${docChange.type}`);
-//         });
-//     });

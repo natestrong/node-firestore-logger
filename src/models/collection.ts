@@ -2,7 +2,7 @@ import firebase from "firebase";
 import FieldPath = firebase.firestore.FieldPath;
 import WhereFilterOp = firebase.firestore.WhereFilterOp;
 
-export type Query = [(string | FieldPath), WhereFilterOp, string];
+export type Query = [(string | FieldPath), WhereFilterOp, string | number];
 
 export interface ICollection {
     path: string,
@@ -12,5 +12,5 @@ export interface ICollection {
 
 export interface IMessage {
     collection: ICollection,
-    message: string
+    message: string,
 }
