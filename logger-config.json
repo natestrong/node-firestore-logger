@@ -1,3 +1,7 @@
 {
-  "pathToCredentials": "/Users/nstrong/Desktop/firestore-logger.json"
+  "pathToCredentials": "/Users/nstrong/Desktop/firestore-logger.json",
+  "emulator": {
+    "host": "localhost",
+    "port": 8080
+  }
 }

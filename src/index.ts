@@ -1,22 +1,74 @@
-import {collectionChanges} from 'rxfire/firestore';
-import {firestore} from "./db";
+import {collectionChanges, collectionData} from 'rxfire/firestore';
+import db from "./db";
 import firebase from "firebase";
 import yargs from "yargs";
-import {merge} from "rxjs";
+import {first, map, merge, Observable, skip} from "rxjs";
 import DocumentChange = firebase.firestore.DocumentChange;
 import {parseCollectionsFromArgs, validateCollections} from "./parseCollectionArgs";
-import {ICollection} from "./models/collection";
-import {logCollectionsInit} from "./logger";
-
+import {ICollection, IMessage} from "./models/collection";
+import logger from "./logger";
+import * as fs from "fs";
 
 const {argv} = yargs(process.argv);
+
+db.initDb(argv.hasOwnProperty('useEmulator'));
 
 let collections: ICollection[];
 let collectionGroups: ICollection[];
 
 [collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
 
-logCollectionsInit(...collections, ...collectionGroups);
+logger.logCollectionsInit(...collections, ...collectionGroups);
+
+const collectionObservables: Observable<IMessage>[] = [];
+
+for (let collection of collections) {
+    const fsCollection = db.firestore.collection(collection.path);
+    if (collection.queries.length) {
+        collection.queries.forEach(query => {
+            fsCollection.where(query.split(','))
+        })
+    }
+
+
+    collectionObservables.push(collectionChanges(fsCollection)
+        .pipe(
+            first(),
+            map(docChanges => ({
+                collection,
+                message: `${collection.path} has ${docChanges.length} docs\n`
+            }))
+        )
+    );
+
+    collectionObservables.push(collectionChanges(fsCollection)
+        .pipe(
+            skip(1),
+            map(docChanges => {
+                const message = docChanges
+                    .map(docChange => `Document ${collection.path}/${docChange.doc.id} has been ${docChange.type}`)
+                    .join('\n');
+                return {
+                    collection,
+                    message
+                };
+            })
+        )
+    );
+    // initialObs.subscribe(docChanges => logger.log(`${docChanges.length} docs in collection`));
+
+    // const streamObs = collectionChanges(fsCollection)
+    //     .pipe(skip(1));
+    // streamObs.subscribe(docChanges => {
+    //     docChanges.forEach(docChange => {
+    //         logger.log(`Document ${docChange.doc.id} has been ${docChange.type}`);
+    //     });
+    // });
+}
+
+merge(...collectionObservables).subscribe(iMessage => {
+    logger.log(iMessage.message);
+});
 
 // const usersCollection = firestore.collection(path);
 //

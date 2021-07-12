@@ -1,14 +1,14 @@
 import {ICollection} from "./models/collection";
 
 export class Logger {
-    logFunc: Function;
+    _logFunc: Function;
 
     constructor(logFunc = console.log) {
-        this.logFunc = logFunc;
+        this._logFunc = logFunc;
     }
 
-    log(message: any) {
-        this.logFunc(message);
+    log(...messages: any) {
+        this._logFunc(...messages);
     }
 
     logCollectionsInit(...collections: ICollection[]) {
@@ -18,3 +18,5 @@ export class Logger {
         }
     }
 }
+
+export default new Logger();

@@ -8,16 +8,16 @@ describe('parseArgs', () => {
 
     it('should return validated collections', () => {
         expect(validateCollections(
-            '/users("first", "==", "Nathan")("last", "==", "Nathan"),/groups("id", ">", 100)',
+            '/users("first", "==", "Nathan")("last", "==", "Strong"),/groups("id", ">", 100)',
             'twitterFollowers("id", ">", 10000)("name", "==", "Leo Messi")'
         ))
             .toEqual([
                 [
-                    {path: '/users', queries: ['("first", "==", "Nathan")', '("last", "==", "Nathan")']},
-                    {path: '/groups', queries: ['("id", ">", 100)']}
+                    {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]]},
+                    {path: '/groups', queries: [["id", ">", 100]]}
                 ],
                 [
-                    {path: 'twitterFollowers', queries: ['("id", ">", 10000)', '("name", "==", "Leo Messi")'], group: true}
+                    {path: 'twitterFollowers', queries: [["id", ">", 10000], ["name", "==", "Leo Messi"]], group: true}
                 ]
             ]);
     });
@@ -26,7 +26,7 @@ describe('parseArgs', () => {
         expect(parseCollectionsFromArgs('/users,/users("first", "==", "Nathan")'))
             .toEqual([
                 {path: '/users', queries: []},
-                {path: '/users', queries: ['("first", "==", "Nathan")']}
+                {path: '/users', queries: [["first", "==", "Nathan"]]}
             ]);
     });
 
@@ -36,17 +36,17 @@ describe('parseArgs', () => {
     });
 
     it('should parse collections with multiple queries', () => {
-        expect(parseCollectionsFromArgs('/users("first", "==", "Nathan")("last", "==", "Nathan"),/groups("id", ">", 100)'))
+        expect(parseCollectionsFromArgs('/users("first", "==", "Nathan")("last", "==", "Strong"),/groups("id", ">", 100)'))
             .toEqual([
-                {path: '/users', queries: ['("first", "==", "Nathan")', '("last", "==", "Nathan")']},
-                {path: '/groups', queries: ['("id", ">", 100)']},
+                {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]]},
+                {path: '/groups', queries: [["id", ">", 100]]},
             ]);
     });
 
     it('should return unique Collections only', () => {
         expect(parseCollectionsFromArgs('/users("first", "==", "Nathan"),/groups,/users("first", "==", "Nathan")'))
             .toEqual([
-                {path: '/users', queries: ['("first", "==", "Nathan")']},
+                {path: '/users', queries: [["first", "==", "Nathan"]]},
                 {path: '/groups', queries: []}
             ]);
     });

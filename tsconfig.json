@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "outDir": "./out"
+    "outDir": "./out",
+    "target": "es5"
   },
   "exclude": [
     "node_modules",

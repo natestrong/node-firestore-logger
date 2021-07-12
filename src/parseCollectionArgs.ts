@@ -38,13 +38,16 @@ function _convertTokenToCollection(token: string): ICollection {
     };
 }
 
-function _getQueriesFromToken(token: string): string[] {
+function _getQueriesFromToken(token: string): [(string | number)[]] | [] {
     const match = token.match(/\(.+/);
     if (!match) {
         return [];
     }
-
-    return match[0].match(/\(.*?\)/g);
+    let queries = match[0].match(/\(.*?\)/g);
+    return queries
+        .map(query => JSON.parse(query
+            .replace('(', '[')
+            .replace(')', ']'))) as [(string | number)[]];
 }
 
 function _validateGroupCollectionPaths(collection: ICollection) {
