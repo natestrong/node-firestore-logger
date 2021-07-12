@@ -1,24 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._convertTokenToCollection = exports.parseCollectionsFromArgs = void 0;
-function parseCollectionsFromArgs(collectionsFromArgs) {
-    var tokens = collectionsFromArgs.split(',');
-    return tokens.map(this._convertTokenToCollection);
+exports.parseCollectionGroupsFromArgs = exports.parseCollectionsFromArgs = void 0;
+var _ = require("lodash");
+/**
+ *
+ * @param arg - String of comma separated collection queries, such as: '/users,/users("first", "==", "Nathan")'
+ */
+function parseCollectionsFromArgs(arg) {
+    var regex = /(?<!["']),/g;
+    var tokens = arg.split(regex);
+    var collections = tokens.map(_convertTokenToCollection);
+    return _.uniqWith(collections, _.isEqual);
 }
 exports.parseCollectionsFromArgs = parseCollectionsFromArgs;
-/**
- * @param token - The string passed in from user args, such as: "/user('name', ==, 'Nathan')"
- */
 function _convertTokenToCollection(token) {
+    var tokens = token.split('(');
+    var path = tokens[0].startsWith('/') ? tokens[0] : '/' + tokens[0];
     return {
-        path: token.split('(')[0],
-        queries: token.split('(')[1] ? '(' + token.split('(')[1] : null
+        collection: path,
+        queries: tokens[1] ? '(' + tokens[1] : null
     };
 }
-exports._convertTokenToCollection = _convertTokenToCollection;
-// export function parseCollectionGroupsFromArgs(collectionGroupsFromArgs: string): ICollectionGroup[] {
-//     const tokens = collectionGroupsFromArgs.split(',');
-//     const paths: ICollection[] = [];
-//     tokens.forEach(this._convertTokenToCollection);
-//     return paths;
-// }
+function parseCollectionGroupsFromArgs(arg) {
+    var regex = /(?<!["']),/g;
+    var tokens = arg.split(regex);
+    var collections = tokens.map(_convertTokenToCollectionGroup);
+    return _.uniqWith(collections, _.isEqual);
+}
+exports.parseCollectionGroupsFromArgs = parseCollectionGroupsFromArgs;
+function _convertTokenToCollectionGroup(token) {
+    var tokens = token.split('(');
+    var path = tokens[0];
+    if (path.includes('/')) {
+        throw new Error('Collection Group must not contain slashes');
+    }
+    return {
+        collectionGroup: path,
+        queries: tokens[1] ? '(' + tokens[1] : null
+    };
+}

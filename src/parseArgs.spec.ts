@@ -1,19 +1,31 @@
-import {_convertTokenToCollection, parseCollectionsFromArgs} from "./parseArgs";
+import {parseCollectionGroupsFromArgs, parseCollectionsFromArgs} from "./parseArgs";
 
 describe('parseArgs', () => {
     it('parseCollectionsFromArgs converts given args as strings to an array of ', () => {
-        const arg = '/users,/users("first", "==", "Nathan")';
-        const expected = [{path: '/users', queries: null}, {path: '/users', queries: '("first", "==", "Nathan")'}];
+        const arg = '/users,/users("first", "==", "Nathan"),users';
+        const expected = [{collection: '/users', queries: null}, {collection: '/users', queries: '("first", "==", "Nathan")'}];
         expect(parseCollectionsFromArgs(arg)).toEqual(expected);
     });
 
-    it('_convertTokenToCollection converts string to ICollection object', () => {
-        const token1 = '/users';
-        const expected1 = {path: '/users', queries: null};
-        expect(_convertTokenToCollection(token1)).toEqual(expected1);
+    it('parseCollectionGroupsFromArgs', () => {
+        const arg1 = 'users,twitterFollowers';
+        const expected1 = [
+            {collectionGroup: 'users', queries: null},
+            {collectionGroup: 'twitterFollowers', queries: null}
+        ];
+        expect(parseCollectionGroupsFromArgs(arg1)).toEqual(expected1);
 
-        const token2 = '/users("first", "==", "Nathan")';
-        const expected2 = {path: '/users', queries: '("first", "==", "Nathan")'};
-        expect(_convertTokenToCollection(token2)).toEqual(expected2);
-    });
+        const arg2 = 'twitterFollowers,twitterFollowers("id", "===", "5")';
+        const expected2 = [
+            {collectionGroup: 'twitterFollowers', queries: null},
+            {collectionGroup: 'twitterFollowers', queries: '("id", "===", "5")'}
+        ];
+        expect(parseCollectionGroupsFromArgs(arg2)).toEqual(expected2);
+
+        const arg3 = '/users';
+        const expected3 = [
+            {collectionGroup: 'users', queries: null},
+        ];
+        expect(() => parseCollectionGroupsFromArgs(arg3)).toThrowError('Collection Group must not contain slashes');
+    })
 });

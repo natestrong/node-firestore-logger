@@ -1,9 +1,9 @@
 export interface ICollection {
-    path: string,
+    collection: string,
     queries: string,
 }
 
 export interface ICollectionGroup {
-    path: string,
+    collectionGroup: string,
     queries: string,
 }

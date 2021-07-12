@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "bin": {
     "firelogger": "./index.js"
@@ -21,8 +22,10 @@
     "@types/lodash": "^4.14.171",
     "@types/node": "^16.0.1",
     "@types/yargs": "^17.0.2",
+    "babel-cli": "^6.26.0",
     "babel-jest": "^27.0.6",
     "jest": "^27.0.6",
+    "ts-jest": "^27.0.3",
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
   },
