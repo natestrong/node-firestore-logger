@@ -1,4 +1,8 @@
-import {ICollection} from "./models/collection";
+import {ICollection, Query} from "./models/collection";
+
+function queriesAsString(query: Query[]) {
+    query.join(', ')
+}
 
 export class Logger {
     _logFunc: Function;
@@ -14,7 +18,7 @@ export class Logger {
     logCollectionsInit(...collections: ICollection[]) {
         for (let collection of collections) {
             this.log(`Watching Collection${collection.group ? ' Group' : ''}: ${collection.path} ${collection.queries.length ?
-                'with queries: ' + collection.queries : ''}`);
+                'with queries: ' + JSON.stringify(collection.queries) : ''}`);
         }
     }
 }

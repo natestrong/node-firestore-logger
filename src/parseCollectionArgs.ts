@@ -1,5 +1,8 @@
 import {ICollection} from "./models/collection";
 import * as _ from 'lodash';
+import firebase from "firebase";
+import FieldPath = firebase.firestore.FieldPath;
+import WhereFilterOp = firebase.firestore.WhereFilterOp;
 
 export function validateCollections(collectionsArg, collectionsGroupsArg): [ICollection[], ICollection[]] {
     let collections = parseCollectionsFromArgs(collectionsArg);
@@ -38,7 +41,7 @@ function _convertTokenToCollection(token: string): ICollection {
     };
 }
 
-function _getQueriesFromToken(token: string): [(string | number)[]] | [] {
+function _getQueriesFromToken(token: string): [[(string | FieldPath), WhereFilterOp, string]] | [] {
     const match = token.match(/\(.+/);
     if (!match) {
         return [];
@@ -47,7 +50,7 @@ function _getQueriesFromToken(token: string): [(string | number)[]] | [] {
     return queries
         .map(query => JSON.parse(query
             .replace('(', '[')
-            .replace(')', ']'))) as [(string | number)[]];
+            .replace(')', ']'))) as [[(string | FieldPath), WhereFilterOp, string]];
 }
 
 function _validateGroupCollectionPaths(collection: ICollection) {

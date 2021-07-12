@@ -8,6 +8,7 @@ import {parseCollectionsFromArgs, validateCollections} from "./parseCollectionAr
 import {ICollection, IMessage} from "./models/collection";
 import logger from "./logger";
 import * as fs from "fs";
+import Query = firebase.firestore.Query;
 
 const {argv} = yargs(process.argv);
 
@@ -23,21 +24,23 @@ logger.logCollectionsInit(...collections, ...collectionGroups);
 const collectionObservables: Observable<IMessage>[] = [];
 
 for (let collection of collections) {
-    const fsCollection = db.firestore.collection(collection.path);
+    let fsCollection = db.firestore.collection(collection.path) as Query;
     if (collection.queries.length) {
         collection.queries.forEach(query => {
-            fsCollection.where(query.split(','))
-        })
+            fsCollection = fsCollection.where(query[0], query[1], query[2]);
+        });
     }
-
 
     collectionObservables.push(collectionChanges(fsCollection)
         .pipe(
             first(),
-            map(docChanges => ({
-                collection,
-                message: `${collection.path} has ${docChanges.length} docs\n`
-            }))
+            map(docChanges => {
+                let queriesMessage = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : '';
+                return {
+                    collection,
+                    message: `${collection.path}${queriesMessage} has ${docChanges.length} docs\n`
+                };
+            })
         )
     );
 
@@ -55,15 +58,6 @@ for (let collection of collections) {
             })
         )
     );
-    // initialObs.subscribe(docChanges => logger.log(`${docChanges.length} docs in collection`));
-
-    // const streamObs = collectionChanges(fsCollection)
-    //     .pipe(skip(1));
-    // streamObs.subscribe(docChanges => {
-    //     docChanges.forEach(docChange => {
-    //         logger.log(`Document ${docChange.doc.id} has been ${docChange.type}`);
-    //     });
-    // });
 }
 
 merge(...collectionObservables).subscribe(iMessage => {

@@ -1,9 +1,12 @@
 import firebase from "firebase";
-import DocumentChangeType = firebase.firestore.DocumentChangeType;
+import FieldPath = firebase.firestore.FieldPath;
+import WhereFilterOp = firebase.firestore.WhereFilterOp;
+
+export type Query = [(string | FieldPath), WhereFilterOp, string];
 
 export interface ICollection {
     path: string,
-    queries: [(string | number)[]] | [],
+    queries: Query[] | [],
     group?: boolean
 }
 
