@@ -1,13 +1,11 @@
-import {collectionChanges, collectionData} from 'rxfire/firestore';
+import {collectionChanges} from 'rxfire/firestore';
 import db from "./db";
 import firebase from "firebase";
 import yargs from "yargs";
 import {first, map, merge, Observable, skip} from "rxjs";
-import DocumentChange = firebase.firestore.DocumentChange;
-import {parseCollectionsFromArgs, validateCollections} from "./parseCollectionArgs";
+import {validateCollections} from "./parseCollectionArgs";
 import {ICollection, IMessage} from "./models/collection";
 import logger from "./logger";
-import * as fs from "fs";
 import Query = firebase.firestore.Query;
 
 const {argv} = yargs(process.argv);
@@ -23,8 +21,13 @@ logger.logCollectionsInit(...collections, ...collectionGroups);
 
 const collectionObservables: Observable<IMessage>[] = [];
 
-for (let collection of collections) {
-    let fsCollection = db.firestore.collection(collection.path) as Query;
+for (let collection of [...collections, ...collectionGroups]) {
+    let fsCollection;
+    if (collection.group) {
+        fsCollection = db.firestore.collectionGroup(collection.path);
+    } else {
+        fsCollection = db.firestore.collection(collection.path) as Query;
+    }
     if (collection.queries.length) {
         collection.queries.forEach(query => {
             fsCollection = fsCollection.where(query[0], query[1], query[2]);
