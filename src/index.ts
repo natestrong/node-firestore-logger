@@ -12,10 +12,7 @@ const {argv} = yargs(process.argv);
 
 db.initDb(argv.hasOwnProperty('useEmulator'));
 
-let collections: ICollection[];
-let collectionGroups: ICollection[];
-
-[collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
+let [collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
 
 logger.logCollectionsInit(...collections, ...collectionGroups);
 
