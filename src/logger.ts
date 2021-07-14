@@ -1,4 +1,4 @@
-import {ICollection, Query} from "./models/collection";
+import {ICollection, IQuery} from "./models/collection";
 
 
 export enum Colors {

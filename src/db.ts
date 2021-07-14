@@ -2,11 +2,11 @@ import firebase from "firebase";
 import * as fs from "fs";
 import * as path from "path";
 import logger from "./logger";
-import App = firebase.app.App;
 import {IConfig} from "./models/configs";
+import App from 'firebase'
 
 class Db {
-    _app: App;
+    _app: App.app.App;
 
     initDb(useEmulator = false) {
         this._app = firebase.initializeApp(this.firestoreConfigs);

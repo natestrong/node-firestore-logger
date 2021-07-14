@@ -1,8 +1,8 @@
 import {ICollection} from "./models/collection";
 import * as _ from 'lodash';
 import firebase from "firebase";
-import FieldPath = firebase.firestore.FieldPath;
-import WhereFilterOp = firebase.firestore.WhereFilterOp;
+import {FieldPath} from '@google-cloud/firestore';
+import {WhereFilterOp} from '@google-cloud/firestore';
 
 export function validateCollections(collectionsArg, collectionsGroupsArg): [ICollection[], ICollection[]] {
     let collections = parseCollectionsFromArgs(collectionsArg);

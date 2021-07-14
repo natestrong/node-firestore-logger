@@ -2,7 +2,9 @@
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "./out",
-    "target": "es5"
+    "target": "es5",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
   },
   "exclude": [
     "node_modules",

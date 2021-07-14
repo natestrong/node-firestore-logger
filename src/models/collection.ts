@@ -2,11 +2,11 @@ import firebase from "firebase";
 import FieldPath = firebase.firestore.FieldPath;
 import WhereFilterOp = firebase.firestore.WhereFilterOp;
 
-export type Query = [(string | FieldPath), WhereFilterOp, string | number];
+export type IQuery = [(string | FieldPath), WhereFilterOp, string | number];
 
 export interface ICollection {
     path: string,
-    queries: Query[] | [],
+    queries: any,
     group?: boolean
 }
 
