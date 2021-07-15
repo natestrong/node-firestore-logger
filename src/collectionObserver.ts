@@ -1,25 +1,19 @@
-import {ICollection, IMessage, IQuery} from "./models/collection";
-import {Observable} from "rxjs";
+import {ICollection} from "./models/collection";
 import db from './db';
-import App from 'firebase'
-import firebase from "firebase";
-// import Query = firebase.firestore.Query;
 import {Query} from '@google-cloud/firestore';
+import {collectionChanges} from "rxfire/firestore";
+import {first, map, Observable, tap} from "rxjs";
+import logger, {COLORS} from "./logger";
+import _ from "lodash";
 
-export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage> {
-    const result: ICollection[] = [];
-
-    for (let collection of collections) {
-        let fsCollection = createFSCollection(collection);
-
-        if (collection.queries.length) {
-            collection.queries.forEach(query => {
-                fsCollection = fsCollection.where(query[0], query[1], query[2]);
-            });
-        }
-    }
-
-    return result;
+export function collectionObserverFactory(collections: ICollection[]): Observable<string>[] {
+    return _.flatMap(collections, (collection) => {
+        const fsCollection = createFSCollection(collection);
+        return [
+            createInitialObs$(fsCollection, collection),
+            // createStreamObs$(fsCollection, collection),
+        ];
+    });
 }
 
 function createFSCollection(collection: ICollection): Query {
@@ -29,7 +23,44 @@ function createFSCollection(collection: ICollection): Query {
     } else {
         fsCollection = db.firestore.collection(collection.path) as unknown as Query;
     }
+
+    if (collection.queries.length) {
+        collection.queries.forEach(query => {
+            fsCollection = fsCollection.where(query[0], query[1], query[2]);
+        });
+    }
     return fsCollection;
+}
+
+function createInitialObs$(fsCollection, collection: ICollection): Observable<string> {
+    return collectionChanges(fsCollection).pipe(
+        first(),
+        map(docChanges => docChangesToInitialMessage(docChanges, collection)),
+        map(colorize(COLORS.BgWhite)),
+        map(padding(10)),
+        tap(val => logger.log('~~~~~~', val)),
+    );
+}
+
+// function createStreamObs$(fsCollection: FirebaseFirestore.Query<FirebaseFirestore.DocumentData>) {
+//
+// }
+
+function docChangesToInitialMessage(docChanges, collection: ICollection): string {
+    let queriesMessage = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : '';
+    return `${collection.path}${queriesMessage} has ${docChanges.length} docs`;
+}
+
+function colorize(color: COLORS) {
+    return function (message: string): string {
+        return color + message + COLORS.Reset;
+    };
+}
+
+function padding(padding: number) {
+    return function (message: string): string {
+        return message.padStart(padding, ' ').padEnd(padding, ' ');
+    };
 }
 
 // for (let collection of [...collections, ...collectionGroups]) {

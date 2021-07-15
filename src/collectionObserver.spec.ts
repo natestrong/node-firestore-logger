@@ -1,5 +1,5 @@
 import {collectionObserverFactory} from "./collectionObserver";
-import {ICollection} from "./models/collection";
+import {ICollection, IMessage} from "./models/collection";
 import db from "./db";
 
 describe('collectionObserverFactory', () => {
@@ -16,5 +16,7 @@ describe('collectionObserverFactory', () => {
         result = collectionObserverFactory(collections);
     });
 
-    it.todo('should create two observables per collection')
+    it('should create two observables per collection', () => {
+        result
+    })
 });

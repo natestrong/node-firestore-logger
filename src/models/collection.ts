@@ -7,7 +7,7 @@ export type IQuery = [(string | FieldPath), WhereFilterOp, string | number];
 export interface ICollection {
     path: string,
     queries: any,
-    group?: boolean
+    group?: boolean,
 }
 
 export interface IMessage {
