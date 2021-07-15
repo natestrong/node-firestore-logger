@@ -6,14 +6,15 @@ import {first, map, Observable, tap} from "rxjs";
 import logger, {COLORS} from "./logger";
 import _ from "lodash";
 
-export function collectionObserverFactory(collections: ICollection[]): Observable<string>[] {
-    return _.flatMap(collections, (collection) => {
+export function collectionObserverFactory(collections: ICollection[]): Observable<string>[] {  // todo <- fix this, not returning observable?
+    const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
             createInitialObs$(fsCollection, collection),
             // createStreamObs$(fsCollection, collection),
         ];
     });
+    return obs$;
 }
 
 function createFSCollection(collection: ICollection): Query {

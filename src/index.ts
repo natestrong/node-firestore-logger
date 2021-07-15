@@ -7,11 +7,14 @@ import {collectionObserverFactory} from "./collectionObserver";
 
 const {argv} = yargs(process.argv);
 
+argv['collections'] = '/users';
+
 db.initDb(argv.hasOwnProperty('useEmulator'));
 
 let [collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
 
 logger.logCollectionsInit(...collections, ...collectionGroups);
+
 
 const observables$: Observable<string>[] = collectionObserverFactory([...collections, ...collectionGroups]);
 
