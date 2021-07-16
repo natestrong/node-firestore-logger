@@ -2,8 +2,8 @@ import {ICollection} from "./models/collection"
 import db from './db'
 import {Query} from '@google-cloud/firestore'
 import {collectionChanges} from "rxfire/firestore"
-import {first, map, Observable, tap} from "rxjs"
-import logger, {COLORS} from "./logger"
+import {first, map, Observable, skip, tap} from "rxjs"
+import {COLORS} from "./logger"
 import _ from "lodash"
 
 export function collectionObserverFactory(collections:ICollection[]):Observable<string>[] {  // todo <- fix this, not returning observable?
@@ -11,7 +11,7 @@ export function collectionObserverFactory(collections:ICollection[]):Observable<
         const fsCollection = createFSCollection(collection);
         return [
             createInitialObs$(fsCollection, collection),
-            // createStreamObs$(fsCollection, collection),
+            createStreamObs$(fsCollection, collection),
         ];
     });
 
@@ -37,30 +37,46 @@ function createFSCollection(collection:ICollection):Query {
 function createInitialObs$(fsCollection, collection:ICollection):Observable<string> {
     return collectionChanges(fsCollection).pipe(
         first(),
-        map(docChanges => docChangesToInitialMessage(docChanges, collection)),
-        map(colorize(COLORS.BgWhite)),
+        map(docChanges => initialMessage(docChanges, collection)),
+        map(colorize(COLORS.BgWhite, COLORS.FgBlack)),
         map(padding(10))
     )
 }
 
-// function createStreamObs$(fsCollection: FirebaseFirestore.Query<FirebaseFirestore.DocumentData>) {
-//
-// }
-
-function docChangesToInitialMessage(docChanges, collection:ICollection):string {
-    let queriesMessage = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : ''
-    return `${collection.path}${queriesMessage} has ${docChanges.length} docs`
+function createStreamObs$(fsCollection, collection:ICollection):Observable<string> {
+    return collectionChanges(fsCollection).pipe(
+        skip(1),
+        map(docChanges => streamMessage(docChanges, collection)),
+        map(colorize(COLORS.BgGreen, COLORS.BgBlack)),
+    )
 }
 
-function colorize(color:COLORS) {
+function initialMessage(docChange, collection:ICollection):string {
+    let message = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : ''
+    return `${collection.path}${message} has ${docChange.length} docs`
+}
+
+function streamMessage(docChanges, collection:ICollection):string {
+
+    // todo - Group batches of messages together
+
+    let message = `docChanges: ${docChanges.length}`
+    // message += `\nDocument ${collection.path}/${docChange.doc.id} has been ${docChange.type}${Colors.Reset}`
+    return message
+}
+
+function colorize(bgColor:COLORS, fgColor:COLORS) {
     return function (message:string):string {
-        return color + message + COLORS.Reset
+        return `${bgColor}${fgColor}${message}${COLORS.Reset}`;
     }
 }
 
-function padding(padding:number) {
+// function colorizeBasedOnAction(action: '')
+
+export function padding(padding:number) {
+    const stringToAppend = new Array(padding).fill(' ').join('');
     return function (message:string):string {
-        return message.padStart(padding, ' ').padEnd(padding, ' ')
+        return `${stringToAppend}${message}${stringToAppend}`;
     }
 }
 
