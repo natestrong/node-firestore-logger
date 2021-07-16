@@ -2,7 +2,7 @@ import {collectionObserverFactory} from "./collectionObserver";
 import {ICollection, IMessage} from "./models/collection";
 import db from "./db";
 
-describe('collectionObserverFactory', () => {
+fdescribe('collectionObserverFactory', () => {
     const collections: ICollection[] = [
         {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]]},
         {path: '/groups', queries: [["id", ">", 100]]},
@@ -16,7 +16,8 @@ describe('collectionObserverFactory', () => {
         result = collectionObserverFactory(collections);
     });
 
-    it('should create two observables per collection', () => {
-        result
+    it('should create observables', () => {
+        expect(result).toHaveLength(6);
     })
+
 });
