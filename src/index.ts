@@ -5,6 +5,7 @@ import {validateCollections} from "./parseCollectionArgs";
 import logger from "./logger";
 import {collectionObserverFactory} from "./collectionObserver";
 import {collectionChanges} from 'rxfire/firestore'
+import {IMessage} from "./models/collection";
 
 const {argv} = yargs(process.argv);
 
@@ -17,7 +18,7 @@ let [collections, collectionGroups] = validateCollections(argv['collections'], a
 
 logger.logCollectionsInit(...collections, ...collectionGroups);
 
-const observables$: Observable<string>[] = collectionObserverFactory([...collections, ...collectionGroups]);
+const observables$: Observable<IMessage>[] = collectionObserverFactory([...collections, ...collectionGroups]);
 
-merge(...observables$).subscribe(message => logger.log(message));
+merge(...observables$).subscribe(message => logger.logIMessage(message));
 

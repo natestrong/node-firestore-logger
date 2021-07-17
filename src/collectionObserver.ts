@@ -1,12 +1,11 @@
-import {ICollection} from "./models/collection"
-import db from './db'
-import {Query} from '@google-cloud/firestore'
-import {collectionChanges} from "rxfire/firestore"
-import {first, map, Observable, skip, tap} from "rxjs"
-import {COLORS} from "./logger"
-import _ from "lodash"
+import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/collection";
+import db from './db';
+import {Query} from '@google-cloud/firestore';
+import {collectionChanges} from "rxfire/firestore";
+import {first, map, Observable, skip} from "rxjs";
+import _ from "lodash";
 
-export function collectionObserverFactory(collections:ICollection[]):Observable<string>[] {  // todo <- fix this, not returning observable?
+export function collectionObserverFactory(collections:ICollection[]):Observable<IMessage>[] {  // todo <- fix this, not returning observable?
     const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
@@ -34,20 +33,23 @@ function createFSCollection(collection:ICollection):Query {
     return fsCollection
 }
 
-function createInitialObs$(fsCollection, collection:ICollection):Observable<string> {
+function createInitialObs$(fsCollection, collection:ICollection):Observable<IMessage> {
     return collectionChanges(fsCollection).pipe(
         first(),
         map(docChanges => initialMessage(docChanges, collection)),
-        map(colorize(COLORS.BgWhite, COLORS.FgBlack)),
-        map(padding(10))
+        map(padding(10)),
+        map(message => ({message, formatting: {bg: BGCOLORS.BgWhite, fg: FGCOLORS.FgBlack, format: FORMAT.Bright}}))
     )
 }
 
-function createStreamObs$(fsCollection, collection:ICollection):Observable<string> {
+function createStreamObs$(fsCollection, collection:ICollection):Observable<IMessage> {
     return collectionChanges(fsCollection).pipe(
         skip(1),
         map(docChanges => streamMessage(docChanges, collection)),
-        map(colorize(COLORS.BgGreen, COLORS.BgBlack)),
+        map(docChanges => ({
+            message: streamMessage(docChanges, collection),
+            formatting: {bg: BGCOLORS.BgWhite, fg: FGCOLORS.FgBlack, format: FORMAT.Bright}})
+        )
     )
 }
 
@@ -57,19 +59,20 @@ function initialMessage(docChange, collection:ICollection):string {
 }
 
 function streamMessage(docChanges, collection:ICollection):string {
-
-    // todo - Group batches of messages together
-
-    let message = `docChanges: ${docChanges.length}`
-    // message += `\nDocument ${collection.path}/${docChange.doc.id} has been ${docChange.type}${Colors.Reset}`
+    let message;
+    if (docChanges.length === 1) {
+        message = `Document ${collection.path}/${docChanges[0].doc.id} has been ${docChanges[0].type}`
+    } else {
+        message = `${docChanges.length} documents at ${collection.path} have been ${docChanges[0].type}`
+    }
     return message
 }
 
-function colorize(bgColor:COLORS, fgColor:COLORS) {
-    return function (message:string):string {
-        return `${bgColor}${fgColor}${message}${COLORS.Reset}`;
-    }
-}
+// function colorize(bgColor:COLORS, fgColor:COLORS) {
+//     return function (message:string):string {
+//         return `${bgColor}${fgColor}${message}${COLORS.Reset}`;
+//     }
+// }
 
 // function colorizeBasedOnAction(action: '')
 
