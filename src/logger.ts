@@ -19,8 +19,9 @@ export class Logger {
     }
 
     logIMessage(message: IMessage) {
-        let log = `${message.formatting.format}${message.formatting.fg}${message.formatting.bg}${message.message}${FORMAT.Reset}`
-        this._logFunc(log)
+        let log =
+            `${message.formatting.format || ''}${message.formatting.fg || ''}${message.formatting.bg || ''}${message.message}${FORMAT.Reset}`;
+        this._logFunc(log);
     }
 }
 
