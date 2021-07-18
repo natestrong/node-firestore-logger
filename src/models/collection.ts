@@ -1,6 +1,6 @@
 import firebase from "firebase";
-import FieldPath = firebase.firestore.FieldPath;
-import WhereFilterOp = firebase.firestore.WhereFilterOp;
+import {FieldPath} from '@google-cloud/firestore';
+import {WhereFilterOp} from '@google-cloud/firestore';
 
 export type IQuery = [(string | FieldPath), WhereFilterOp, string | number];
 

@@ -1,11 +1,15 @@
 import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/collection";
 import db from './db';
-import {Query} from '@google-cloud/firestore';
+import {DocumentChange, Query, DocumentChangeType} from '@google-cloud/firestore';
 import {collectionChanges} from "rxfire/firestore";
-import {first, map, Observable, skip} from "rxjs";
+import {bufferTime, debounceTime, first, map, Observable, skip, tap} from "rxjs";
 import _ from "lodash";
+import fp from "lodash/fp"
+import {bufferDebounce} from "./utils/bufferDebounce";
+import {NestedArray, WithKey} from "./utils/types";
+import {firestore} from "firebase-admin/lib/firestore";
 
-export function collectionObserverFactory(collections:ICollection[]):Observable<IMessage>[] {  // todo <- fix this, not returning observable?
+export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage>[] {  // todo <- fix this, not returning observable?
     const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
@@ -14,74 +18,96 @@ export function collectionObserverFactory(collections:ICollection[]):Observable<
         ];
     });
 
-    return obs$
+    return obs$;
 }
 
-function createFSCollection(collection:ICollection):Query {
-    let fsCollection
+function createFSCollection(collection: ICollection): Query {
+    let fsCollection;
     if (collection.group) {
-        fsCollection = db.firestore.collectionGroup(collection.path)
+        fsCollection = db.firestore.collectionGroup(collection.path);
     } else {
-        fsCollection = db.firestore.collection(collection.path) as unknown as Query
+        fsCollection = db.firestore.collection(collection.path) as unknown as Query;
     }
 
     if (collection.queries.length) {
         collection.queries.forEach(query => {
-            fsCollection = fsCollection.where(query[0], query[1], query[2])
-        })
+            fsCollection = fsCollection.where(query[0], query[1], query[2]);
+        });
     }
-    return fsCollection
+    return fsCollection;
 }
 
-function createInitialObs$(fsCollection, collection:ICollection):Observable<IMessage> {
+function createInitialObs$(fsCollection, collection: ICollection): Observable<IMessage> {
     return collectionChanges(fsCollection).pipe(
         first(),
         map(docChanges => initialMessage(docChanges, collection)),
         map(padding(10)),
         map(message => ({message, formatting: {bg: BGCOLORS.BgWhite, fg: FGCOLORS.FgBlack, format: FORMAT.Bright}}))
-    )
+    );
 }
 
-function createStreamObs$(fsCollection, collection:ICollection):Observable<IMessage> {
+function createStreamObs$(fsCollection, collection: ICollection): Observable<IMessage> {
+    const docChangesToMessages = streamMessages(collection);
     return collectionChanges(fsCollection).pipe(
         skip(1),
-        map(docChanges => ({
-            message: streamMessage(docChanges, collection),
-            formatting: {fg: getColorForType(docChanges[0].type), format: FORMAT.Bright}})
-        )
-    )
+        bufferDebounce(500),
+        map(fp.pipe(
+            flattenDocChanges,
+            docChangesToMessages
+        )),
+        tap(console.log)
+    );
 }
 
-function initialMessage(docChange, collection:ICollection):string {
-    let message = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : ''
-    return `${collection.path}${message} has ${docChange.length} docs`
+export function flattenDocChanges(docChanges: any): { [any: string]: DocumentChange[] } {
+    const flattenedDocs = _.flattenDeep(docChanges as []);
+    const grouped = [];
+    for (const doc of flattenedDocs) {
+        if (!grouped.length || grouped[grouped.length - 1].type !== doc['type']) {
+            grouped.push({type: doc['type'], docs: [doc]});
+        } else {
+            grouped[grouped.length - 1].docs.push(doc);
+        }
+    }
+    return grouped as unknown as { [any: string]: DocumentChange[] };
 }
 
-function streamMessage(docChanges, collection:ICollection):string {
+function streamMessages(collection) {
+    return function docChangesToMessages(docChanges) {
+
+    }
+}
+
+function streamMessage(docChanges, collection: ICollection): string {
     let message;
     if (docChanges.length === 1) {
-        message = `Document ${collection.path}/${docChanges[0].doc.id} has been ${docChanges[0].type}`
+        message = `Document ${collection.path}/${docChanges[0].doc.id} has been ${docChanges[0].type}`;
     } else {
-        message = `${docChanges.length} documents at ${collection.path} have been ${docChanges[0].type}`
+        message = `${docChanges.length} documents at ${collection.path} have been ${docChanges[0].type}`;
     }
-    return message
+    return message;
 }
 
-export function padding(padding:number) {
+function initialMessage(docChange, collection: ICollection): string {
+    let message = collection.queries.length ? ' with queries: ' + JSON.stringify(collection.queries) : '';
+    return `${collection.path}${message} has ${docChange.length} docs`;
+}
+
+export function padding(padding: number) {
     const stringToAppend = new Array(padding).fill(' ').join('');
-    return function (message:string):string {
+    return function (message: string): string {
         return `${stringToAppend}${message}${stringToAppend}`;
-    }
+    };
 }
 
-function getColorForType(type: 'added' | 'modified' | 'removed'): FGCOLORS {
+function getColorForType(type: DocumentChangeType): FGCOLORS {
     switch (type) {
         case 'added':
-            return FGCOLORS.FgGreen
+            return FGCOLORS.FgGreen;
         case 'modified':
-            return FGCOLORS.FgBlue
+            return FGCOLORS.FgBlue;
         case 'removed':
-            return FGCOLORS.FgRed
+            return FGCOLORS.FgRed;
 
     }
 }

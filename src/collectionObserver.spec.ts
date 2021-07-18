@@ -1,6 +1,8 @@
-import {collectionObserverFactory, padding} from "./collectionObserver"
+import {collectionObserverFactory, flattenDocChanges, padding} from "./collectionObserver";
 import {ICollection, IMessage} from "./models/collection";
 import db from "./db";
+import {DocumentChange} from "@google-cloud/firestore";
+import {NestedArray} from "./utils/types";
 
 fdescribe('collectionObserverFactory', () => {
     db.initDb(true);
@@ -25,5 +27,18 @@ fdescribe('collectionObserverFactory', () => {
         const padFunc = padding(10);
         let message = 'hello';
         expect(padFunc(message)).toBe('          hello          ');
+    })
+
+    it('should break nested arrays of arbitrary docChanges into batches', () => {
+        const docChanges = [[{doc: {id: 10}, type: 'added'}], [{doc: {id: 11}, type: 'added'}], [[[{doc: {id: 12}, type: 'added'}, [{doc: {id: 14}, type: 'removed'}]]]], [{doc: {id: 15}, type: 'removed'}], {doc: {id: 12}, type: 'added'}] as NestedArray<DocumentChange>
+        const expected = [
+            {type: 'added', docs: [{doc: {id: 10}, type: 'added'}, {doc: {id: 11}, type: 'added'}, {doc: {id: 12}, type: 'added'}]},
+            {type: 'removed', docs: [{doc: {id: 14}, type: 'removed'}, {doc: {id: 15}, type: 'removed'}]},
+            {type: 'added', docs: [{doc: {id: 12}, type: 'added'}]},
+        ]
+
+        const result = flattenDocChanges(docChanges)
+
+        expect(result).toEqual(expected);
     })
 });
