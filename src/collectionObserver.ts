@@ -4,7 +4,7 @@ import {DocumentChange, Query, DocumentChangeType} from '@google-cloud/firestore
 import {collectionChanges} from "rxfire/firestore";
 import {bufferTime, debounceTime, first, map, Observable, skip, tap} from "rxjs";
 import _ from "lodash";
-import fp from "lodash/fp"
+import fp from "lodash/fp";
 import {bufferDebounce} from "./utils/bufferDebounce";
 import {GroupedDocChanges, NestedArray, WithKey} from "./utils/types";
 import {firestore} from "firebase-admin/lib/firestore";
@@ -47,15 +47,14 @@ function createInitialObs$(fsCollection, collection: ICollection): Observable<IM
 }
 
 function createStreamObs$(fsCollection, collection: ICollection): Observable<IMessage[]> {
-    const docChangesToMessages = streamMessages(collection);
+    const docChangesToIMessages = streamMessages(collection);
     return collectionChanges(fsCollection).pipe(
         skip(1),
         bufferDebounce(500),
         map(fp.pipe(
             flattenDocChanges,
-            docChangesToMessages,
+            docChangesToIMessages,
         )),
-        tap(console.log)
     );
 }
 
@@ -73,17 +72,23 @@ export function flattenDocChanges(docChanges: any): GroupedDocChanges {
 }
 
 function streamMessages(collection) {
-    return function docChangesToMessages(groupedDocChanges:GroupedDocChanges) {
-        let message = '';
+    return function docChangesToIMessages(groupedDocChanges: GroupedDocChanges): IMessage[] {
+        const iMessages = [];
+        [] = [];
         for (const groupedDocChange of groupedDocChanges) {
+            let message;
             if (groupedDocChange.docs.length === 1) {
-                message += `Document ${collection.path}/${groupedDocChange.docs[0].doc.id} has been ${groupedDocChange.type}`;
+                message = `Document ${collection.path}/${groupedDocChange.docs[0].doc.id} has been ${groupedDocChange.type}`;
             } else {
-                message += `${groupedDocChange.docs.length} documents at ${collection.path} have been ${groupedDocChange.type}`;
+                message = `${groupedDocChange.docs.length} documents at ${collection.path} have been ${groupedDocChange.type}`;
             }
+            iMessages.push({
+                message,
+                formatting: {fg: getColorForType(groupedDocChange.type)}
+            });
         }
-        return message;
-    }
+        return iMessages;
+    };
 }
 
 function streamMessage(docChanges, collection: ICollection): string {
