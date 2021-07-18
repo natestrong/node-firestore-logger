@@ -13,7 +13,7 @@ export function collectionObserverFactory(collections: ICollection[]): Observabl
     const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
-            // createInitialObs$(fsCollection, collection),
+            createInitialObs$(fsCollection, collection),
             createStreamObs$(fsCollection, collection),
         ];
     });
@@ -37,12 +37,12 @@ function createFSCollection(collection: ICollection): Query {
     return fsCollection;
 }
 
-function createInitialObs$(fsCollection, collection: ICollection): Observable<IMessage> {
+function createInitialObs$(fsCollection, collection: ICollection): Observable<IMessage[]> {
     return collectionChanges(fsCollection).pipe(
         first(),
         map(docChanges => initialMessage(docChanges, collection)),
         map(padding(10)),
-        map(message => ({message, formatting: {bg: BGCOLORS.BgWhite, fg: FGCOLORS.FgBlack, format: FORMAT.Bright}}))
+        map(message => ([{message, formatting: {bg: BGCOLORS.BgWhite, fg: FGCOLORS.FgBlack, format: FORMAT.Bright}}]))
     );
 }
 
