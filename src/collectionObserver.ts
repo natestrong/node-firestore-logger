@@ -6,14 +6,14 @@ import {bufferTime, debounceTime, first, map, Observable, skip, tap} from "rxjs"
 import _ from "lodash";
 import fp from "lodash/fp"
 import {bufferDebounce} from "./utils/bufferDebounce";
-import {NestedArray, WithKey} from "./utils/types";
+import {GroupedDocChanges, NestedArray, WithKey} from "./utils/types";
 import {firestore} from "firebase-admin/lib/firestore";
 
-export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage>[] {  // todo <- fix this, not returning observable?
+export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage[]>[] {  // todo <- fix this, not returning observable?
     const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
-            createInitialObs$(fsCollection, collection),
+            // createInitialObs$(fsCollection, collection),
             createStreamObs$(fsCollection, collection),
         ];
     });
@@ -46,20 +46,20 @@ function createInitialObs$(fsCollection, collection: ICollection): Observable<IM
     );
 }
 
-function createStreamObs$(fsCollection, collection: ICollection): Observable<IMessage> {
+function createStreamObs$(fsCollection, collection: ICollection): Observable<IMessage[]> {
     const docChangesToMessages = streamMessages(collection);
     return collectionChanges(fsCollection).pipe(
         skip(1),
         bufferDebounce(500),
         map(fp.pipe(
             flattenDocChanges,
-            docChangesToMessages
+            docChangesToMessages,
         )),
         tap(console.log)
     );
 }
 
-export function flattenDocChanges(docChanges: any): { [any: string]: DocumentChange[] } {
+export function flattenDocChanges(docChanges: any): GroupedDocChanges {
     const flattenedDocs = _.flattenDeep(docChanges as []);
     const grouped = [];
     for (const doc of flattenedDocs) {
@@ -69,12 +69,20 @@ export function flattenDocChanges(docChanges: any): { [any: string]: DocumentCha
             grouped[grouped.length - 1].docs.push(doc);
         }
     }
-    return grouped as unknown as { [any: string]: DocumentChange[] };
+    return grouped as unknown as GroupedDocChanges;
 }
 
 function streamMessages(collection) {
-    return function docChangesToMessages(docChanges) {
-
+    return function docChangesToMessages(groupedDocChanges:GroupedDocChanges) {
+        let message = '';
+        for (const groupedDocChange of groupedDocChanges) {
+            if (groupedDocChange.docs.length === 1) {
+                message += `Document ${collection.path}/${groupedDocChange.docs[0].doc.id} has been ${groupedDocChange.type}`;
+            } else {
+                message += `${groupedDocChange.docs.length} documents at ${collection.path} have been ${groupedDocChange.type}`;
+            }
+        }
+        return message;
     }
 }
 
