@@ -1,8 +1,8 @@
 import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/collection";
 import db from './db';
-import {DocumentChangeType, Query} from '@google-cloud/firestore';
+import {DocumentChange, DocumentChangeType, Query} from '@google-cloud/firestore';
 import {collectionChanges} from "rxfire/firestore";
-import {first, map, Observable, skip} from "rxjs";
+import {first, generate, map, Observable, skip} from "rxjs";
 import _ from "lodash";
 import fp from "lodash/fp";
 import {bufferDebounce} from "./utils/bufferDebounce";
@@ -28,7 +28,6 @@ function createFSCollection(collection: ICollection): Query {
         fsCollection = db.firestore.collection(collection.path) as unknown as Query;
     }
 
-    console.log(collection.queries);
     if (collection.queries.length) {
         collection.queries.forEach(query => {
             fsCollection = fsCollection.where(query[0], query[1], query[2]);
@@ -71,7 +70,16 @@ export function flattenDocChanges(docChanges: any): GroupedDocChanges {
     return grouped as unknown as GroupedDocChanges;
 }
 
-function streamMessages(collection) {
+function generatePropertiesMessage(doc: DocumentChange, properties: string[]): string {
+    let message = '';
+    for (const property of properties) {
+        const propString = property + ":"
+        message += `\n${propString.padEnd(10, " ")} ${doc.doc.get(property).padStart(20, "")}`;
+    }
+    return message;
+}
+
+function streamMessages(collection: ICollection) {
     return function docChangesToIMessages(groupedDocChanges: GroupedDocChanges): IMessage[] {
         const iMessages = [];
         [] = [];
@@ -79,6 +87,9 @@ function streamMessages(collection) {
             let message;
             if (groupedDocChange.docs.length === 1) {
                 message = `Document ${collection.path}/${groupedDocChange.docs[0].doc.id} has been ${groupedDocChange.type}`;
+                if (collection.properties.length) {
+                    message += generatePropertiesMessage(groupedDocChange.docs[0], collection.properties);
+                }
             } else {
                 message = `${groupedDocChange.docs.length} documents at ${collection.path} have been ${groupedDocChange.type}`;
             }

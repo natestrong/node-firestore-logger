@@ -8,8 +8,8 @@ import {IMessage} from "./models/collection";
 
 const {argv} = yargs(process.argv);
 
-// argv['collections'] = '/users';
-// argv['useEmulator'] = true;
+argv['collections'] = '/users["first", "last"]';
+argv['useEmulator'] = true;
 
 db.initDb(argv.hasOwnProperty('useEmulator'));
 
