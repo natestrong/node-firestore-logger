@@ -1,15 +1,14 @@
 import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/collection";
 import db from './db';
-import {DocumentChange, Query, DocumentChangeType} from '@google-cloud/firestore';
+import {DocumentChangeType, Query} from '@google-cloud/firestore';
 import {collectionChanges} from "rxfire/firestore";
-import {bufferTime, debounceTime, first, map, Observable, skip, tap} from "rxjs";
+import {first, map, Observable, skip} from "rxjs";
 import _ from "lodash";
 import fp from "lodash/fp";
 import {bufferDebounce} from "./utils/bufferDebounce";
-import {GroupedDocChanges, NestedArray, WithKey} from "./utils/types";
-import {firestore} from "firebase-admin/lib/firestore";
+import {GroupedDocChanges} from "./utils/types";
 
-export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage[]>[] {  // todo <- fix this, not returning observable?
+export function collectionObserverFactory(collections: ICollection[]): Observable<IMessage[]>[] {
     const obs$ = _.flatMap(collections, (collection) => {
         const fsCollection = createFSCollection(collection);
         return [
@@ -29,6 +28,7 @@ function createFSCollection(collection: ICollection): Query {
         fsCollection = db.firestore.collection(collection.path) as unknown as Query;
     }
 
+    console.log(collection.queries);
     if (collection.queries.length) {
         collection.queries.forEach(query => {
             fsCollection = fsCollection.where(query[0], query[1], query[2]);

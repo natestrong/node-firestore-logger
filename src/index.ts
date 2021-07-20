@@ -4,13 +4,12 @@ import {merge, Observable} from "rxjs";
 import {validateCollections} from "./parseCollectionArgs";
 import logger from "./logger";
 import {collectionObserverFactory} from "./collectionObserver";
-import {collectionChanges} from 'rxfire/firestore'
 import {IMessage} from "./models/collection";
 
 const {argv} = yargs(process.argv);
 
-argv['collections'] = '/users';
-argv['useEmulator'] = true;
+// argv['collections'] = '/users';
+// argv['useEmulator'] = true;
 
 db.initDb(argv.hasOwnProperty('useEmulator'));
 

@@ -37,7 +37,8 @@ function _convertTokenToCollection(token: string): ICollection {
     let path = token.split('(')[0];
     return {
         path: path,
-        queries: _getQueriesFromToken(token)
+        queries: _getQueriesFromToken(token),
+        properties: [],
     };
 }
 

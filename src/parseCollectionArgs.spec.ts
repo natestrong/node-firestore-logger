@@ -13,11 +13,11 @@ describe('parseArgs', () => {
         ))
             .toEqual([
                 [
-                    {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]]},
-                    {path: '/groups', queries: [["id", ">", 100]]}
+                    {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]], properties: []},
+                    {path: '/groups', queries: [["id", ">", 100]], properties: []}
                 ],
                 [
-                    {path: 'twitterFollowers', queries: [["id", ">", 10000], ["name", "==", "Leo Messi"]], group: true}
+                    {path: 'twitterFollowers', queries: [["id", ">", 10000], ["name", "==", "Leo Messi"]], group: true, properties: []}
                 ]
             ]);
     });
@@ -25,8 +25,8 @@ describe('parseArgs', () => {
     it('should convert args to Collection arrays', () => {
         expect(parseCollectionsFromArgs('/users,/users("first", "==", "Nathan")'))
             .toEqual([
-                {path: '/users', queries: []},
-                {path: '/users', queries: [["first", "==", "Nathan"]]}
+                {path: '/users', queries: [], properties: []},
+                {path: '/users', queries: [["first", "==", "Nathan"]], properties: []}
             ]);
     });
 
@@ -38,16 +38,16 @@ describe('parseArgs', () => {
     it('should parse collections with multiple queries', () => {
         expect(parseCollectionsFromArgs('/users("first", "==", "Nathan")("last", "==", "Strong"),/groups("id", ">", 100)'))
             .toEqual([
-                {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]]},
-                {path: '/groups', queries: [["id", ">", 100]]},
+                {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]], properties: []},
+                {path: '/groups', queries: [["id", ">", 100]], properties: []},
             ]);
     });
 
     it('should return unique Collections only', () => {
         expect(parseCollectionsFromArgs('/users("first", "==", "Nathan"),/groups,/users("first", "==", "Nathan")'))
             .toEqual([
-                {path: '/users', queries: [["first", "==", "Nathan"]]},
-                {path: '/groups', queries: []}
+                {path: '/users', queries: [["first", "==", "Nathan"]], properties: []},
+                {path: '/groups', queries: [], properties: []}
             ]);
     });
 
