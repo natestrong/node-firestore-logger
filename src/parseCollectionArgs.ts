@@ -16,7 +16,7 @@ export function validateCollections(collectionsArg, collectionsGroupsArg): [ICol
 }
 
 /**
- * @param arg - String of comma separated collection queries, such as: '/users,/users("first", "==", "Nathan")'
+ * @param arg - String of comma separated collection queries, such as: '/users,/users("first", "==", "Nathan")["first"]'
  * @param groups - Whether or not to treat collection paths as collectionGroup paths, which do not allow '/'s
  */
 export function parseCollectionsFromArgs(arg: string, groups: boolean = false): ICollection[] {
@@ -35,11 +35,23 @@ export function parseCollectionsFromArgs(arg: string, groups: boolean = false): 
 
 function _convertTokenToCollection(token: string): ICollection {
     let path = token.split('(')[0];
+    path = path.split('[')[0];
     return {
         path: path,
         queries: _getQueriesFromToken(token),
-        properties: [],
+        properties: _getPropertiesFromToken(token),
     };
+}
+
+function _getPropertiesFromToken(token: string): string[] {
+    const regexp = /(\[.*])/gm
+
+    let properties = [];
+    const match = token.match(regexp);
+    if (match) {
+        properties = JSON.parse(match[0]);
+    }
+    return properties;
 }
 
 function _getQueriesFromToken(token: string): [[(string | FieldPath), WhereFilterOp, string]] | [] {

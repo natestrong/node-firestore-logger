@@ -8,12 +8,12 @@ describe('parseArgs', () => {
 
     it('should return validated collections', () => {
         expect(validateCollections(
-            '/users("first", "==", "Nathan")("last", "==", "Strong"),/groups("id", ">", 100)',
+            '/users("first", "==", "Nathan")("last", "==", "Strong")["first"],/groups("id", ">", 100)',
             'twitterFollowers("id", ">", 10000)("name", "==", "Leo Messi")'
         ))
             .toEqual([
                 [
-                    {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]], properties: []},
+                    {path: '/users', queries: [["first", "==", "Nathan"], ["last", "==", "Strong"]], properties: ["first"]},
                     {path: '/groups', queries: [["id", ">", 100]], properties: []}
                 ],
                 [
@@ -55,4 +55,12 @@ describe('parseArgs', () => {
         expect(() => parseCollectionsFromArgs('/users,twitterFollowers', true))
             .toThrowError('collectionGroups can not contain "/"');
     });
+
+    it('should parse properties', () => {
+        expect(parseCollectionsFromArgs('/users["first"],/users("first", "==", "Nathan")["last"]'))
+            .toEqual([
+                {path: '/users', queries: [], properties: ["first"]},
+                {path: '/users', queries: [["first", "==", "Nathan"]], properties: ["last"]}
+            ]);
+    })
 });
