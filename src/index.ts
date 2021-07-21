@@ -20,4 +20,3 @@ logger.logCollectionsInit(...collections, ...collectionGroups);
 const observables$: Observable<IMessage[]>[] = collectionObserverFactory([...collections, ...collectionGroups]);
 
 merge(...observables$).subscribe(messages => logger.logIMessages(messages));
-
