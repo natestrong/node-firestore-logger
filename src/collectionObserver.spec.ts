@@ -34,25 +34,25 @@ describe('collectionObserverFactory', () => {
         expect(padFunc(message)).toBe('          hello          ');
     });
 
-    it('should break nested arrays of arbitrary docChanges into batches', () => {
-        const docChanges = [[{doc: {id: 10}, type: 'added'}], [{doc: {id: 11}, type: 'added'}], [[[{
-            doc: {id: 12},
-            type: 'added'
-        }, [{doc: {id: 14}, type: 'removed'}]]]], [{doc: {id: 15}, type: 'removed'}], {
-            doc: {id: 12},
-            type: 'added'
-        }];
-        const expected = [
-            {
-                type: 'added',
-                docs: [{doc: {id: 10}, type: 'added'}, {doc: {id: 11}, type: 'added'}, {doc: {id: 12}, type: 'added'}]
-            },
-            {type: 'removed', docs: [{doc: {id: 14}, type: 'removed'}, {doc: {id: 15}, type: 'removed'}]},
-            {type: 'added', docs: [{doc: {id: 12}, type: 'added'}]},
-        ];
-
-        const result = flattenDocChanges(docChanges);
-
-        expect(result).toEqual(expected);
-    });
+    // it('should break nested arrays of arbitrary docChanges into batches', () => {
+    //     const docChanges = [[{doc: {id: 10}, type: 'added'}], [{doc: {id: 11}, type: 'added'}], [[[{
+    //         doc: {id: 12},
+    //         type: 'added'
+    //     }, [{doc: {id: 14}, type: 'removed'}]]]], [{doc: {id: 15}, type: 'removed'}], {
+    //         doc: {id: 12},
+    //         type: 'added'
+    //     }];
+    //     const expected = [
+    //         {
+    //             type: 'added',
+    //             docs: [{doc: {id: 10}, type: 'added'}, {doc: {id: 11}, type: 'added'}, {doc: {id: 12}, type: 'added'}]
+    //         },
+    //         {type: 'removed', docs: [{doc: {id: 14}, type: 'removed'}, {doc: {id: 15}, type: 'removed'}]},
+    //         {type: 'added', docs: [{doc: {id: 12}, type: 'added'}]},
+    //     ];
+    //
+    //     const result = flattenDocChanges(docChanges);
+    //
+    //     expect(result).toEqual(expected);
+    // });
 });
