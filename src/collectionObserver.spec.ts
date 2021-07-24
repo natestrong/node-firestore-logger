@@ -21,12 +21,12 @@ describe('collectionObserverFactory', () => {
     let result: ICollection[];
 
     beforeEach(() => {
-        result = collectionObserverFactory(collections);
+        // result = collectionObserverFactory(collections);
     });
 
-    // it('should create 2 observables for each collection', () => {
-    //     expect(result).toHaveLength(6);
-    // });
+    xit('should create 2 observables for each collection', () => {
+        expect(result).toHaveLength(6);
+    });
 
     it('should pad a string with x chars', () => {
         const padFunc = padding(10);
