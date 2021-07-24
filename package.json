@@ -1,7 +1,7 @@
 {
-  "name": "node-firestore-logger",
-  "version": "1.0.0",
-  "description": "",
+  "name": "firestore-logger",
+  "version": "0.1.0",
+  "description": "A small app to log out updates to Firestore at given paths",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -10,8 +10,18 @@
   "bin": {
     "firelogger": "./index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "firestore",
+    "logger",
+    "firebase",
+    "google",
+    "gcp",
+    "logs",
+    "log",
+    "fs"
+  ],
+  "repository": "natestrong/node-firestore-logger",
+  "author": "Nathan Strong",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.14.6",
