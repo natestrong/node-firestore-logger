@@ -41,7 +41,7 @@ describe('collectionObserverFactory', () => {
         }, [{doc: {id: 14}, type: 'removed'}]]]], [{doc: {id: 15}, type: 'removed'}], {
             doc: {id: 12},
             type: 'added'
-        }] as NestedArray<DocumentChange>;
+        }];
         const expected = [
             {
                 type: 'added',
