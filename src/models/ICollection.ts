@@ -5,11 +5,18 @@ import {WhereFilterOp} from '@google-cloud/firestore';
 export type IQuery = [(string | FieldPath), WhereFilterOp, string | number];
 
 export interface ICollection {
+    name?: string
     path: string,
-    queries: any,
+    queries: IQuery[],
     properties: string[],
     group?: boolean,
 }
+
+export const DEFAULT_ICOLLECTION: Partial<ICollection> = {
+    group: false,
+    properties: [],
+    queries: []
+};
 
 export interface IMessage {
     message: string,

@@ -1,19 +1,20 @@
 import db from "./db";
 import yargs from "yargs";
 import {merge, Observable} from "rxjs";
-import {validateCollections} from "./parseCollectionArgs";
+import {validateCollectionArgs} from "./parseCollectionArgs";
 import logger from "./logger";
 import {collectionObserverFactory} from "./collectionObserver";
-import {IMessage} from "./models/collection";
+import {IMessage} from "./models/ICollection";
+import getConfigs from "./configs";
+import {IConfig} from "./models/IConfigs";
 
 const {argv} = yargs(process.argv);
 
-argv['collections'] = '/users["first", "last"]';
-argv['useEmulator'] = true;
+const configs: IConfig = getConfigs();
 
-db.initDb(argv.hasOwnProperty('useEmulator'));
+let [collections, collectionGroups] = validateCollectionArgs(argv['collections'], argv['collectionGroups']);
 
-let [collections, collectionGroups] = validateCollections(argv['collections'], argv['collectionGroups']);
+db.initDb(configs);
 
 logger.logCollectionsInit(...collections, ...collectionGroups);
 

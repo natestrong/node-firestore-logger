@@ -1,10 +1,10 @@
-import {ICollection} from "./models/collection";
+import {ICollection, IQuery} from "./models/ICollection";
 import * as _ from 'lodash';
 import firebase from "firebase";
 import {FieldPath} from '@google-cloud/firestore';
 import {WhereFilterOp} from '@google-cloud/firestore';
 
-export function validateCollections(collectionsArg, collectionsGroupsArg): [ICollection[], ICollection[]] {
+export function validateCollectionArgs(collectionsArg, collectionsGroupsArg): [ICollection[], ICollection[]] {
     let collections = parseCollectionsFromArgs(collectionsArg);
     let collectionGroups = parseCollectionsFromArgs(collectionsGroupsArg, true);
 
@@ -27,7 +27,7 @@ export function parseCollectionsFromArgs(arg: string, groups: boolean = false): 
     const collections = tokens.map(_convertTokenToCollection);
 
     if (groups) {
-        collections.forEach(_validateGroupCollectionPaths);
+        collections.forEach(validateGroupCollectionPaths);
     }
 
     return _.uniqWith(collections, _.isEqual);
@@ -38,12 +38,12 @@ function _convertTokenToCollection(token: string): ICollection {
     path = path.split('[')[0];
     return {
         path: path,
-        queries: _getQueriesFromToken(token),
-        properties: _getPropertiesFromToken(token),
+        queries: getQueriesFromToken(token),
+        properties: getPropertiesFromToken(token),
     };
 }
 
-function _getPropertiesFromToken(token: string): string[] {
+function getPropertiesFromToken(token: string): string[] {
     const regexp = /(\[.*])/gm
 
     let properties = [];
@@ -54,19 +54,22 @@ function _getPropertiesFromToken(token: string): string[] {
     return properties;
 }
 
-function _getQueriesFromToken(token: string): [[(string | FieldPath), WhereFilterOp, string]] | [] {
+function getQueriesFromToken(token: string): IQuery[] | [] {
     const match = token.match(/\(.+/);
     if (!match) {
         return [];
     }
     let queries = match[0].match(/\(.*?\)/g);
-    return queries
-        .map(query => JSON.parse(query
-            .replace('(', '[')
-            .replace(')', ']'))) as [[(string | FieldPath), WhereFilterOp, string]];
+    return queries.map(stringToQuery);
 }
 
-function _validateGroupCollectionPaths(collection: ICollection) {
+export function stringToQuery(str: string): IQuery {
+    return JSON.parse(str
+        .replace('(', '[')
+        .replace(')', ']'));
+}
+
+function validateGroupCollectionPaths(collection: ICollection) {
     if (collection.path.includes('/')) {
         throw new Error('collectionGroups can not contain "/"');
     }

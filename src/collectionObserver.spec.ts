@@ -1,5 +1,5 @@
 import {collectionObserverFactory, flattenDocChanges, padding} from "./collectionObserver";
-import {ICollection} from "./models/collection";
+import {ICollection} from "./models/ICollection";
 import db from "./db";
 // import {DocumentChange} from "@google-cloud/firestore";
 import {NestedArray} from "./utils/types";

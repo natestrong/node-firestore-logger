@@ -1,4 +1,4 @@
-import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/collection";
+import {BGCOLORS, FGCOLORS, FORMAT, ICollection, IMessage} from "./models/ICollection";
 import db from './db';
 import {DocumentChange, DocumentChangeType, Query} from '@google-cloud/firestore';
 import {collectionChanges} from "rxfire/firestore";

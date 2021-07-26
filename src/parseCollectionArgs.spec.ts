@@ -1,13 +1,13 @@
-import {parseCollectionsFromArgs, validateCollections} from "./parseCollectionArgs";
+import {parseCollectionsFromArgs, validateCollectionArgs} from "./parseCollectionArgs";
 
 describe('parseArgs', () => {
     it('should validate that some collections are to be operated on via args', () => {
-        expect(() => validateCollections('', ''))
+        expect(() => validateCollectionArgs('', ''))
             .toThrowError('Must supply a collection or collection group to watch. Use --help for more info.');
     });
 
     it('should return validated collections', () => {
-        expect(validateCollections(
+        expect(validateCollectionArgs(
             '/users("first", "==", "Nathan")("last", "==", "Strong")["first"],/groups("id", ">", 100)',
             'twitterFollowers("id", ">", 10000)("name", "==", "Leo Messi")'
         ))

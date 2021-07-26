@@ -1,0 +1,24 @@
+{
+  "pathToCredentials": "/Users/nstrong/Desktop/firestore-logger.json",
+  "emulator": {
+    "useEmulator": true,
+    "host": "localhost",
+    "port": 8080
+  },
+  "bufferUpdates": 1000,
+  "presets": [
+    {
+      "name": "users",
+      "path": "/users"
+    },
+    {
+      "name": "bornBefore",
+      "path": "/users",
+      "group": false,
+      "queries": [
+        ["last", "<", "m"],
+        ["first", "<", "m"]
+      ]
+    }
+  ]
+}

@@ -10,9 +10,14 @@ describe('logger', () => {
 
     it('should log initialization of collections', () => {
         logger.logCollectionsInit(
-            {path: '/users', queries: [["first", "==", "Nathan"], ["first", "==", "Strong"]]},
-            {path: '/groups', queries: [["id", ">", 100]]},
-            {path: 'twitterFollowers', queries: [["first", "==", "Nathan"], ["first", "==", "Strong"]], group: true}
+            {path: '/users', queries: [["first", "==", "Nathan"], ["first", "==", "Strong"]], properties: []},
+            {path: '/groups', queries: [["id", ">", 100]], properties: []},
+            {
+                path: 'twitterFollowers',
+                queries: [["first", "==", "Nathan"], ["first", "==", "Strong"]],
+                group: true,
+                properties: []
+            }
         );
         expect(logSpy).toHaveBeenCalledTimes(3);
     });

@@ -1,4 +1,4 @@
-import {FORMAT, ICollection, IMessage, IQuery} from "./models/collection";
+import {FORMAT, ICollection, IMessage, IQuery} from "./models/ICollection";
 
 export class Logger {
     _logFunc: Function;
