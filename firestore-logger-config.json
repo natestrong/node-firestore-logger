@@ -16,8 +16,7 @@
       "path": "/users",
       "group": false,
       "queries": [
-        ["last", "<", "m"],
-        ["first", "<", "m"]
+        ["last", "<", "m"]
       ]
     }
   ]

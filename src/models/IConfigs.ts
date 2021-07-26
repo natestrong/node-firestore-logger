@@ -27,4 +27,5 @@ export const DEFAULT_CONFIGS = {
 export const DEFAULT_PRESET = {
     group: false,
     queries: [],
+    properties: [],
 }
